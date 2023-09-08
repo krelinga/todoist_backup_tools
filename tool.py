@@ -4,6 +4,7 @@
 import csv
 import dataclasses
 import sys
+import textwrap
 
 
 @dataclasses.dataclass
@@ -74,13 +75,29 @@ def ReadFile(csv_path: str) -> list[CSVLine]:
     return csv_lines
 
 
+def PrettyPrintTasks(tasks: list[TodoistTask]) -> None:
+    for task in tasks:
+        print('========================')
+        print(textwrap.dedent(f'''\
+                {task.content}
+                -------------'''))
+        if len(task.description) > 0:
+            print(task.description)
+        print(textwrap.dedent(f'''\
+                - priority: {task.priority}
+                - date: {task.date}
+                - author: {task.author}
+                - responsible: {task.responsible}
+                - notes: {len(task.notes)}'''))
+        print('========================')
+
+
 def main():
     assert len(sys.argv) == 2, sys.argv
     csv_path = sys.argv[1]
     csv_lines = ReadFile(csv_path)
     tasks = ConvertCsvLinesToTasks(csv_lines)
-    for task in tasks:
-        print(task)
+    PrettyPrintTasks(tasks)
 
 
 if __name__ == '__main__':
