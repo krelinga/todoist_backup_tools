@@ -89,6 +89,9 @@ def PrettyPrintTasks(tasks: list[TodoistTask]) -> None:
                 - author: {task.author}
                 - responsible: {task.responsible}
                 - notes: {len(task.notes)}'''))
+        for note in task.notes:
+            print(f'  - note from {note.author} at {note.date}:')
+            print(f'    {note.content}')
         print('========================')
 
 
