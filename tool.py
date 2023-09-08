@@ -6,10 +6,12 @@ import sys
 
 
 def main():
-    print('hello world!')
     assert len(sys.argv) == 2, sys.argv
     csv_path = sys.argv[1]
-    print(csv_path)
+    with open(csv_path, newline='') as csv_file:
+        csv_reader = csv.reader(csv_file)
+        for row in csv_reader:
+            print('\t'.join(row))
 
 
 if __name__ == '__main__':
