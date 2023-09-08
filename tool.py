@@ -52,7 +52,9 @@ def ConvertCsvLinesToTasks(csv_lines: list[CSVLine]) -> list[TodoistTask]:
 
     todoist_tasks = []
     for csv_line in csv_lines:
-        if csv_line.type == 'task':
+        if csv_line.type == '':
+            continue
+        elif csv_line.type == 'task':
             todoist_tasks.append(copy_relevant_fields(csv_line, TodoistTask))
         elif csv_line.type == 'note':
             assert len(todoist_tasks) > 0
@@ -75,8 +77,8 @@ def ReadFile(csv_path: str) -> list[CSVLine]:
 def main():
     assert len(sys.argv) == 2, sys.argv
     csv_path = sys.argv[1]
-    entries = filter(lambda x: x.type != '', ReadFile(csv_path))
-    tasks = ConvertCsvLinesToTasks(entries)
+    csv_lines = ReadFile(csv_path)
+    tasks = ConvertCsvLinesToTasks(csv_lines)
     for task in tasks:
         print(task)
 
