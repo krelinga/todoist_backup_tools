@@ -33,8 +33,9 @@ def ReadFile(csv_path: str) -> list[CSVLine]:
 def main():
     assert len(sys.argv) == 2, sys.argv
     csv_path = sys.argv[1]
-    entries = ReadFile(csv_path)
-    print(entries)
+    entries = filter(lambda x: x.type != '', ReadFile(csv_path))
+    for entry in entries:
+        print(entry)
 
 
 if __name__ == '__main__':
