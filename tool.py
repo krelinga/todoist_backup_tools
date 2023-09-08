@@ -112,11 +112,17 @@ class Subcommand:
 class List(Subcommand):
     def ConfigureArgs(self, parser: argparse.ArgumentParser) -> None:
         parser.add_argument('csv_path')
+        parser.add_argument('--long', action='store_true', default=False, dest='long')
 
     def Run(self, args: argparse.Namespace) -> int:
         csv_lines = ReadFile(args.csv_path)
         tasks = ConvertCsvLinesToTasks(csv_lines)
-        PrettyPrintTasks(tasks)
+        if args.long:
+            PrettyPrintTasks(tasks)
+        else:
+            for task in tasks:
+                print(task.id)
+        return 0
 
 def main():
     commands = {
