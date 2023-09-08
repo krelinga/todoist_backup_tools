@@ -100,13 +100,35 @@ def PrettyPrintTasks(tasks: list[TodoistTask]) -> None:
         print('========================')
 
 
+# TODO: use a proper interface once I have internet access again (if such a thing exists in python?)
+class Subcommand:
+    def ConfigureArgs(self, parser: argparse.ArgumentParser) -> None:
+        pass
+
+    def Run(self, args: argparse.Namespace) -> int:
+        pass
+
+
+class List(Subcommand):
+    def ConfigureArgs(self, parser: argparse.ArgumentParser) -> None:
+        parser.add_argument('csv_path')
+
+    def Run(self, args: argparse.Namespace) -> int:
+        csv_lines = ReadFile(args.csv_path)
+        tasks = ConvertCsvLinesToTasks(csv_lines)
+        PrettyPrintTasks(tasks)
+
 def main():
+    commands = {
+            'list': List(),
+    }
     parser = argparse.ArgumentParser()
-    parser.add_argument('csv_path')
+    subparsers = parser.add_subparsers(dest='command')
+    for name, command in commands.items():
+        command_parser = subparsers.add_parser(name)
+        command.ConfigureArgs(command_parser)
     args = parser.parse_args()
-    csv_lines = ReadFile(args.csv_path)
-    tasks = ConvertCsvLinesToTasks(csv_lines)
-    PrettyPrintTasks(tasks)
+    sys.exit(commands[args.command].Run(args))
 
 
 if __name__ == '__main__':
