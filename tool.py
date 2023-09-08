@@ -41,6 +41,10 @@ class TodoistTask:
     timezone: str
     notes: list[TodoistNote] = dataclasses.field(default_factory=list)
 
+    @property
+    def id(self):
+        return format(abs(hash(self.content)), 'X')
+
 
 def ConvertCsvLinesToTasks(csv_lines: list[CSVLine]) -> list[TodoistTask]:
     def copy_relevant_fields(csv_line: CSVLine, out_type):
@@ -79,7 +83,7 @@ def PrettyPrintTasks(tasks: list[TodoistTask]) -> None:
     for task in tasks:
         print('========================')
         print(textwrap.dedent(f'''\
-                {task.content}
+                [{task.id}] {task.content}
                 -------------'''))
         if len(task.description) > 0:
             print(task.description)
