@@ -22,14 +22,14 @@ class CSVLine:
     timezone: str
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class TodoistNote:
     content: str
     author: str
     date: str
 
 
-@dataclasses.dataclass
+@dataclasses.dataclass(frozen=True)
 class TodoistTask:
     content: str
     description: str
@@ -40,7 +40,7 @@ class TodoistTask:
     date: str
     date_lang: str
     timezone: str
-    notes: list[TodoistNote] = dataclasses.field(default_factory=list)
+    notes: tuple[TodoistNote] = dataclasses.field(default_factory=tuple)
 
     # TODO: this hash is not stable across binary invocations ... no good.
     @property
@@ -49,26 +49,36 @@ class TodoistTask:
 
 
 def ConvertCsvLinesToTasks(csv_lines: list[CSVLine]) -> list[TodoistTask]:
-    def copy_relevant_fields(csv_line: CSVLine, out_type):
-        csv_line_as_dict = dataclasses.asdict(csv_line)
+    def copy_relevant_fields(in_record, out_type, extra_fields:dict|None=None):
+        in_record_as_dict = dataclasses.asdict(in_record)
         copied_values = {}
         for field_name in map(lambda x: x.name, dataclasses.fields(out_type)):
-            if field_name in csv_line_as_dict:
-                copied_values[field_name] = csv_line_as_dict[field_name]
+            if field_name in in_record_as_dict:
+                copied_values[field_name] = in_record_as_dict[field_name]
+        if extra_fields is not None:
+            # TODO: this can probably be replaced by a one-liner.
+            for field_name, field_value in extra_fields.items():
+                copied_values[field_name] = field_value
         return out_type(**copied_values)
 
-    todoist_tasks = []
+    # This could probably be made cleaner ... i'm not sure I need to convert these types before clustering them?
+    last_task = None
+    task_to_comments = {}
     for csv_line in csv_lines:
         if csv_line.type == '':
             continue
         elif csv_line.type == 'task':
-            todoist_tasks.append(copy_relevant_fields(csv_line, TodoistTask))
+            task = copy_relevant_fields(csv_line, TodoistTask)
+            last_task = task
+            task_to_comments[task] = []
         elif csv_line.type == 'note':
-            assert len(todoist_tasks) > 0
-            todoist_tasks[-1].notes.append(copy_relevant_fields(csv_line, TodoistNote))
+            assert last_task is not None
+            assert last_task in task_to_comments
+            task_to_comments[last_task].append(copy_relevant_fields(csv_line, TodoistNote))
         else:
             assert False, f'unrecognized type {csv_line.type}'
-    return todoist_tasks
+    return [copy_relevant_fields(task, TodoistTask, extra_fields={'notes':notes})
+            for task, notes in task_to_comments.items()]
 
 
 def ReadFile(csv_path: str) -> list[CSVLine]:
