@@ -1,6 +1,7 @@
 #! /usr/bin/python3
 
 
+import argparse
 import csv
 import dataclasses
 import sys
@@ -100,9 +101,10 @@ def PrettyPrintTasks(tasks: list[TodoistTask]) -> None:
 
 
 def main():
-    assert len(sys.argv) == 2, sys.argv
-    csv_path = sys.argv[1]
-    csv_lines = ReadFile(csv_path)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('csv_path')
+    args = parser.parse_args()
+    csv_lines = ReadFile(args.csv_path)
     tasks = ConvertCsvLinesToTasks(csv_lines)
     PrettyPrintTasks(tasks)
 
