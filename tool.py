@@ -42,6 +42,7 @@ class TodoistTask:
     timezone: str
     notes: list[TodoistNote] = dataclasses.field(default_factory=list)
 
+    # TODO: this hash is not stable across binary invocations ... no good.
     @property
     def id(self):
         return format(abs(hash(self.content)), 'X')
