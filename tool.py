@@ -45,7 +45,7 @@ class TodoistTask:
     # TODO: this hash is not stable across binary invocations ... no good.
     @property
     def id(self):
-        return format(abs(hash(self.content)), 'X')
+        return format(abs(hash(self.content)), '016X')
 
 
 def ConvertCsvLinesToTasks(csv_lines: list[CSVLine]) -> list[TodoistTask]:
@@ -130,7 +130,7 @@ def main():
             'list': List(),
     }
     parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(dest='command')
+    subparsers = parser.add_subparsers(dest='command', required=True)
     for name, command in commands.items():
         command_parser = subparsers.add_parser(name)
         command.ConfigureArgs(command_parser)
